@@ -19,13 +19,13 @@ final class WebView: WKWebView {
         let config = WKWebViewConfiguration()
         config.mediaTypesRequiringUserActionForPlayback = .all
 
-         // Disable the Apple Intelligence Writing tools in the web views.
+       // Disable the Apple Intelligence Writing tools in the web views.
         // See https://github.com/readium/swift-toolkit/issues/509#issuecomment-2577780749
-        if #available(iOS 18.0, *) {
-        if let behavior = UITextView.WritingToolsBehavior.self as? UITextView.WritingToolsBehavior.Type {
-            behavior.writingToolsBehavior = .none
-        }
-    }
+        #if compiler(>=6.0)
+            if #available(iOS 18.0, *) {
+                config.writingToolsBehavior = .none
+            }
+        #endif
         
         super.init(frame: .zero, configuration: config)
 
