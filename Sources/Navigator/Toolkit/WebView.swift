@@ -13,27 +13,20 @@ import UIKit
 final class WebView: WKWebView {
     private let editingActions: EditingActionsController
 
-    init(editingActions: EditingActionsController) {
-        self.editingActions = editingActions
-
+    init() {
         let config = WKWebViewConfiguration()
-        config.mediaTypesRequiringUserActionForPlayback = .all
 
-        // Disable Apple Intelligence Writing tools (iOS 18.0 and above)
-        // See https://github.com/readium/swift-toolkit/issues/509#issuecomment-2577780749
-        #if compiler(>=6.0)
+        // Check for iOS 18.0 and above
         if #available(iOS 18.0, *) {
+            // Ensure using the latest SDK
+            #if compiler(>=6.0)
             config.writingToolsBehavior = .none
+            #endif
+        } else {
+            // Optional: Handle older iOS versions if needed
         }
-        #endif
 
         super.init(frame: .zero, configuration: config)
-
-        #if DEBUG && swift(>=5.8)
-        if #available(macOS 13.3, iOS 16.4, *) {
-            isInspectable = true
-        }
-        #endif
     }
 
     @available(*, unavailable)
