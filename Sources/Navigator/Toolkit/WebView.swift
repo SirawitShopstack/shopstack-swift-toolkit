@@ -21,9 +21,8 @@ final class WebView: WKWebView {
          // Disable the Apple Intelligence Writing tools in the web views.
         // See https://github.com/readium/swift-toolkit/issues/509#issuecomment-2577780749
          if #available(iOS 18.0, *) {
-        if let behavior = UITextView.WritingToolsBehavior.self as? UITextView.WritingToolsBehavior.Type {
-            behavior.writingToolsBehavior = .none
-        }
+                config.writingToolsBehavior = UIWritingToolsBehavior.none
+         }
     }
         
         super.init(frame: .zero, configuration: config)
