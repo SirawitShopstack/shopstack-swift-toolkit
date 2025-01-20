@@ -14,38 +14,27 @@ final class WebView: WKWebView {
     private let editingActions: EditingActionsController
 
     init(editingActions: EditingActionsController) {
-        self.editingActions = editingActions
+    self.editingActions = editingActions
 
-        let config = WKWebViewConfiguration()
-        config.mediaTypesRequiringUserActionForPlayback = .all
+    let config = WKWebViewConfiguration()
+    config.mediaTypesRequiringUserActionForPlayback = .all
 
-        // Disable the Apple Intelligence Writing tools in the web views.
-        // See https://github.com/readium/swift-toolkit/issues/509#issuecomment-2577780749
-        if #available(iOS 18.0, *) {
-            if let behavior = UITextView.WritingToolsBehavior.self as? UITextView.WritingToolsBehavior.Type {
-                behavior.writingToolsBehavior = .none
-            }
-        } else {
-            let selector = #selector(setter: WKWebViewConfiguration.writingToolsBehavior)
-            if let methodSignature = config.method(for: selector) {
-                let invocation = NSInvocation(methodSignature: methodSignature)
-                invocation.selector = selector
-                invocation.target = config
-
-                var arg: NSInteger = NSInteger(UIWritingToolsBehavior.none.rawValue)
-                invocation.setArgument(&arg, at: 2)
-                invocation.invoke()
-            }
-        }
-
-        super.init(frame: .zero, configuration: config)
-
-        #if DEBUG && swift(>=5.8)
-            if #available(macOS 13.3, iOS 16.4, *) {
-                isInspectable = true
-            }
-        #endif
+    // Disable writing tools, only for iOS 18.0 and newer
+    if #available(iOS 18.0, *) {
+        UITextView.writingToolsBehavior = .none
+    } else {
+        // No action needed for iOS versions below 18.0, as this feature doesn't exist
+        print("Writing tools behavior is not applicable for iOS versions earlier than 18.0")
     }
+    
+    super.init(frame: .zero, configuration: config)
+
+    #if DEBUG && swift(>=5.8)
+        if #available(macOS 13.3, iOS 16.4, *) {
+            isInspectable = true
+        }
+    #endif
+}
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
