@@ -13,18 +13,27 @@ import UIKit
 final class WebView: WKWebView {
     private let editingActions: EditingActionsController
 
-    init() {
+    init(editingActions: EditingActionsController) {
+        self.editingActions = editingActions
+
         let config = WKWebViewConfiguration()
+        config.mediaTypesRequiringUserActionForPlayback = .all
+
+         // Disable the Apple Intelligence Writing tools in the web views.
+        // See https://github.com/readium/swift-toolkit/issues/509#issuecomment-2577780749
+        if #available(iOS 18.0, *) {
+        if let behavior = UITextView.WritingToolsBehavior.self as? UITextView.WritingToolsBehavior.Type {
+            behavior.writingToolsBehavior = .none
+        }
+    }
+        
         super.init(frame: .zero, configuration: config)
-    }
 
-
-    override func buildMenu(with builder: any UIMenuBuilder) {
-        // No super call to prevent default menu items
-    }
-
-    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
-        return false // Disable all actions
+        #if DEBUG && swift(>=5.8)
+            if #available(macOS 13.3, iOS 16.4, *) {
+                isInspectable = true
+            }
+        #endif
     }
 
     @available(*, unavailable)
@@ -34,20 +43,25 @@ final class WebView: WKWebView {
 
     func clearSelection() {
         evaluateJavaScript("window.getSelection().removeAllRanges()")
-        // Toggle user interaction to remove selection overlays (for iOS < 12)
+        // Before iOS 12, we also need to disable user interaction to get rid of the selection overlays.
         isUserInteractionEnabled = false
         isUserInteractionEnabled = true
     }
 
     override func buildMenu(with builder: any UIMenuBuilder) {
+    // Check if the current iOS version supports UIMenuBuilder
         if #available(iOS 13.0, *) {
             editingActions.buildMenu(with: builder)
-            // Do not call super to exclude default menu items like “Copy Link with Highlight”
+            // Do not call super to remove the “Copy Link with Highlight” menu item
+            // See https://github.com/readium/swift-toolkit/issues/509
+            // super.buildMenu(with: builder)
+        } else {
         }
     }
 
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
-        return super.canPerformAction(action, withSender: sender) && editingActions.canPerformAction(action)
+        super.canPerformAction(action, withSender: sender)
+            && editingActions.canPerformAction(action)
     }
 
     override func copy(_ sender: Any?) {
@@ -60,12 +74,14 @@ final class WebView: WKWebView {
     }
 
     private func setupDragAndDrop() {
-        guard !editingActions.canCopy else { return }
-
-        // Locate the content view containing drag interactions
-        if let webScrollView = subviews.first(where: { $0 is UIScrollView }),
-           let contentView = webScrollView.subviews.first(where: { $0.interactions.count > 1 }),
-           let dragInteraction = contentView.interactions.first(where: { $0 is UIDragInteraction }) {
+        if !editingActions.canCopy {
+            guard
+                let webScrollView = subviews.first(where: { $0 is UIScrollView }),
+                let contentView = webScrollView.subviews.first(where: { $0.interactions.count > 1 }),
+                let dragInteraction = contentView.interactions.first(where: { $0 is UIDragInteraction })
+            else {
+                return
+            }
             contentView.removeInteraction(dragInteraction)
         }
     }
