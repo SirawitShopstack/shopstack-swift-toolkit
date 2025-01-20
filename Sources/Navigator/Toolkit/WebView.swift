@@ -24,7 +24,6 @@ final class WebView: WKWebView {
          if #available(iOS 18.0, *) {
                 config.writingToolsBehavior = UIWritingToolsBehavior.none
          }
-    }
         
         super.init(frame: .zero, configuration: config)
 
