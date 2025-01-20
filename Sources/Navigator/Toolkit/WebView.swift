@@ -6,6 +6,7 @@
 
 import Foundation
 import WebKit
+import UIKit
 
 /// A custom web view which:
 ///  - Forwards copy: menu action to an EditingActionsController.
@@ -20,11 +21,12 @@ final class WebView: WKWebView {
 
          // Disable the Apple Intelligence Writing tools in the web views.
         // See https://github.com/readium/swift-toolkit/issues/509#issuecomment-2577780749
-        if #available(iOS 18.0, *) {
-        if let behavior = UITextView.WritingToolsBehavior.self as? UITextView.WritingToolsBehavior.Type {
-            behavior.writingToolsBehavior = .none
+       if #available(iOS 13.0, *) {
+            editingActions.buildMenu(with: builder)
+            // Do not call super to remove the “Copy Link with Highlight” menu item
+            // See https://github.com/readium/swift-toolkit/issues/509
+            // super.buildMenu(with: builder)
         }
-    }
         
         super.init(frame: .zero, configuration: config)
 
