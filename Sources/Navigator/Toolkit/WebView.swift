@@ -15,18 +15,16 @@ final class WebView: WKWebView {
 
     init() {
         let config = WKWebViewConfiguration()
-
-        // Check for iOS 18.0 and above
-        if #available(iOS 18.0, *) {
-            // Ensure using the latest SDK
-            #if compiler(>=6.0)
-            config.writingToolsBehavior = .none
-            #endif
-        } else {
-            // Optional: Handle older iOS versions if needed
-        }
-
         super.init(frame: .zero, configuration: config)
+    }
+
+
+    override func buildMenu(with builder: any UIMenuBuilder) {
+        // No super call to prevent default menu items
+    }
+
+    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        return false // Disable all actions
     }
 
     @available(*, unavailable)
