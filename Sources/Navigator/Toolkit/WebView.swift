@@ -6,6 +6,7 @@
 
 import Foundation
 import WebKit
+import UIKit
 
 /// A custom web view which:
 ///  - Forwards copy: menu action to an EditingActionsController.
